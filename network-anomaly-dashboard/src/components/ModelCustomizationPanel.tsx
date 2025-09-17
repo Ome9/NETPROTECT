@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +13,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import {
   Sliders, Database, Shield, Brain,
   Play, RefreshCw, Save, Upload, Download,
-  Activity, Target
+  Activity, Target, Network
 } from 'lucide-react';
+import { networkAPI } from '../lib/api';
 
 interface ModelSettings {
   sensitivity: number;
@@ -99,6 +100,53 @@ export const ModelCustomizationPanel: React.FC = () => {
     forwardingPort: 5140
   });
 
+  const [availableInterfaces, setAvailableInterfaces] = useState<string[]>(['eth0', 'Wi-Fi']);
+  const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false);
+  const [monitoringStatus, setMonitoringStatus] = useState<'idle' | 'starting' | 'active' | 'error'>('idle');
+
+  // Handle network interface change
+  const handleInterfaceChange = async (interfaceName: string) => {
+    setNetworkConfig(prev => ({
+      ...prev,
+      monitoringInterface: interfaceName
+    }));
+    
+    // Start monitoring on selected interface
+    try {
+      setMonitoringStatus('starting');
+      await networkAPI.startNetworkMonitoring(interfaceName);
+      setMonitoringStatus('active');
+      console.log(`Started monitoring on interface: ${interfaceName}`);
+    } catch (error) {
+      setMonitoringStatus('error');
+      console.error('Failed to start monitoring:', error);
+    }
+  };
+
+  // Fetch real network interfaces on component mount
+  useEffect(() => {
+    const fetchNetworkInterfaces = async () => {
+      setIsLoadingInterfaces(true);
+      try {
+        const interfaces = await networkAPI.getAvailableNetworkInterfaces();
+        setAvailableInterfaces(interfaces);
+        // Set the first interface as default if current one is not available
+        if (!interfaces.includes(networkConfig.monitoringInterface)) {
+          setNetworkConfig(prev => ({
+            ...prev,
+            monitoringInterface: interfaces[0] || 'eth0'
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch network interfaces:', error);
+      } finally {
+        setIsLoadingInterfaces(false);
+      }
+    };
+
+    fetchNetworkInterfaces();
+  }, []);
+
   const handleSettingChange = (key: keyof ModelSettings, value: number) => {
     setModelSettings(prev => ({
       ...prev,
@@ -125,7 +173,11 @@ export const ModelCustomizationPanel: React.FC = () => {
           clearInterval(interval);
           return 100;
         }
-        return prev + Math.random() * 10;
+        // More realistic training progress - slower at the end
+        const increment = prev < 50 ? 3 + Math.random() * 4 : 
+                         prev < 90 ? 1 + Math.random() * 2 :
+                         0.5 + Math.random() * 1;
+        return Math.min(100, prev + increment);
       });
     }, 500);
   };
@@ -403,15 +455,46 @@ export const ModelCustomizationPanel: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <motion.div whileHover={{ scale: 1.02 }} className="p-4 glass-effect rounded-lg">
-                  <label className="text-xs text-gray-300 mb-2 block">Monitoring Interface</label>
-                  <Input
+                  <label className="text-xs text-gray-300 mb-2 block flex items-center gap-2">
+                    <Network className="w-3 h-3" />
+                    Monitoring Interface (like Wireshark)
+                  </label>
+                  <select
                     value={networkConfig.monitoringInterface}
-                    onChange={(e) => setNetworkConfig(prev => ({
-                      ...prev,
-                      monitoringInterface: e.target.value
-                    }))}
-                    className="bg-transparent border-gray-600 text-white"
-                  />
+                    onChange={(e) => handleInterfaceChange(e.target.value)}
+                    className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
+                    disabled={isLoadingInterfaces || monitoringStatus === 'starting'}
+                  >
+                    {availableInterfaces.map((interfaceName) => (
+                      <option key={interfaceName} value={interfaceName}>
+                        {interfaceName}
+                      </option>
+                    ))}
+                  </select>
+                  {isLoadingInterfaces && (
+                    <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Loading interfaces...
+                    </div>
+                  )}
+                  {monitoringStatus === 'starting' && (
+                    <div className="text-xs text-blue-400 mt-1 flex items-center gap-1">
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Starting monitoring...
+                    </div>
+                  )}
+                  {monitoringStatus === 'active' && (
+                    <div className="text-xs text-green-400 mt-1 flex items-center gap-1">
+                      <Activity className="w-3 h-3" />
+                      Monitoring active
+                    </div>
+                  )}
+                  {monitoringStatus === 'error' && (
+                    <div className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                      <Shield className="w-3 h-3" />
+                      Failed to start monitoring
+                    </div>
+                  )}
                 </motion.div>
 
                 <motion.div whileHover={{ scale: 1.02 }} className="p-4 glass-effect rounded-lg">

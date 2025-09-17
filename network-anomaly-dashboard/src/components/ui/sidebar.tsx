@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Menu, X, Home, Shield, Brain, BarChart3, Settings, 
   Activity, Network, AlertTriangle, Database,
-  Bell, User, HelpCircle, LogOut, Sparkles
+  Bell, User, HelpCircle, LogOut
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,7 +27,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navigationItems = [
     { id: 'overview', label: 'Overview', icon: Home, badge: null },
-    { id: 'demo', label: 'UI Showcase', icon: Sparkles, badge: 'NEW' },
     { id: 'topology', label: 'Network Topology', icon: Network, badge: null },
     { id: 'threats', label: 'Threat Detection', icon: AlertTriangle, badge: threatCount > 0 ? threatCount : null },
     { id: 'model', label: 'ML Monitoring', icon: Brain, badge: null },

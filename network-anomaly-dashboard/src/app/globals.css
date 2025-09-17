@@ -28,6 +28,22 @@
   --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   --gradient-rainbow: linear-gradient(45deg, 
     #ff006e, #fb5607, #ffbe0b, #8338ec, #3a86ff, #06ffa5, #ff006e);
+    
+  /* Dynamic Theme Variables - Updated by JavaScript */
+  --theme-primary: #ff00ff;
+  --theme-secondary: #00ffff;
+  --theme-accent: #ff0080;
+  --theme-background: linear-gradient(135deg, #1a0033, #330066, #660033);
+  --theme-card-bg: rgba(255, 0, 255, 0.1);
+  --theme-text: #ffffff;
+  --theme-border: #ff00ff;
+  --theme-glow: #ff00ff;
+  
+  /* UI Settings Variables */
+  --animations-enabled: 1;
+  --bg-opacity: 0.85;
+  --glow-enabled: 1;
+  --grid-spacing: 1.5rem;
 }
 
 @theme inline {
@@ -801,4 +817,62 @@ body {
     animation: none;
     transition: none;
   }
+}
+
+/* Theme-based styles */
+.theme-card {
+  background: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.theme-card:hover {
+  box-shadow: 0 0 20px var(--theme-glow) !important;
+}
+
+.theme-primary {
+  color: var(--theme-primary) !important;
+}
+
+.theme-secondary {
+  color: var(--theme-secondary) !important;
+}
+
+.theme-accent {
+  color: var(--theme-accent) !important;
+}
+
+.theme-bg-primary {
+  background-color: var(--theme-primary) !important;
+}
+
+.theme-border {
+  border-color: var(--theme-border) !important;
+}
+
+.theme-glow {
+  box-shadow: 0 0 20px var(--theme-glow) !important;
+}
+
+/* Apply theme background to body */
+body {
+  background: var(--theme-background);
+  background-attachment: fixed;
+}
+
+/* Enhanced theme-aware progress bars */
+.progress-themed {
+  background: var(--theme-primary);
+}
+
+/* Theme-aware buttons */
+.btn-themed {
+  background: linear-gradient(45deg, var(--theme-primary), var(--theme-secondary));
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+.btn-themed:hover {
+  box-shadow: 0 0 15px var(--theme-glow);
+  transform: scale(1.05);
 }
