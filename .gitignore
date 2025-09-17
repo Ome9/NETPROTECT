@@ -1,0 +1,233 @@
+# =====================================
+# NetProtect AI Network Security Suite
+# =====================================
+
+# Python virtual environments and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+.env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# IDE and editor files
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+*~
+.kiro/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.Trash-*
+*.pem
+
+# =====================================
+# Next.js Dashboard (network-anomaly-dashboard/)
+# =====================================
+
+# dependencies
+network-anomaly-dashboard/node_modules/
+network-anomaly-dashboard/.pnp
+network-anomaly-dashboard/.pnp.*
+network-anomaly-dashboard/.yarn/*
+!network-anomaly-dashboard/.yarn/patches
+!network-anomaly-dashboard/.yarn/plugins
+!network-anomaly-dashboard/.yarn/releases
+!network-anomaly-dashboard/.yarn/versions
+
+# next.js build output
+network-anomaly-dashboard/.next/
+network-anomaly-dashboard/out/
+network-anomaly-dashboard/build/
+
+# testing
+network-anomaly-dashboard/coverage/
+
+# typescript
+network-anomaly-dashboard/*.tsbuildinfo
+network-anomaly-dashboard/next-env.d.ts
+
+# debug logs
+network-anomaly-dashboard/npm-debug.log*
+network-anomaly-dashboard/yarn-debug.log*
+network-anomaly-dashboard/yarn-error.log*
+network-anomaly-dashboard/.pnpm-debug.log*
+
+# env files
+network-anomaly-dashboard/.env*
+
+# vercel
+network-anomaly-dashboard/.vercel
+
+# =====================================
+# AI/ML Training and Models (Essential models only via Git LFS)
+# =====================================
+
+# Training checkpoints and intermediate models
+models/*/checkpoints/
+models/*/temp/
+models/*/logs/
+models/*/runs/
+results/temp/
+results/checkpoints/
+results/logs/
+
+# Exclude large training result files (keep only essential ones)
+results/*.png
+results/*.jpg
+results/*.jpeg
+results/*.pdf
+results/training_logs/
+results/validation_logs/
+results/experiment_*/
+
+# Training artifacts and logs
+*.log
+training_*.log
+validation_*.log
+experiment_*.log
+model_*.log
+
+# ML experiment tracking
+experiments/
+wandb/
+mlruns/
+.mlflow/
+tensorboard_logs/
+lightning_logs/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# =====================================
+# Datasets (Excluded from Git)
+# =====================================
+
+# All dataset directories - these are large and should be downloaded separately
+CSE-CIC_Dataset/
+NSL-KDD_Dataset/
+UNSW_Dataset/
+
+# Dataset files by extension
+*.arff
+*.csv
+*.parquet
+*.feather
+
+# Dataset processing artifacts
+*/temp/
+*/tmp/
+*/cache/
+*/.cache/
+*/processed/
+*/raw/
+
+# =====================================
+# Network Security & Monitoring
+# =====================================
+
+# Network monitoring data
+network_captures/
+pcap_files/
+*.pcap
+*.pcapng
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+network_logs.db
+threat_database.db
+
+# Security sensitive files
+*.key
+*_rsa
+*_rsa.pub
+certificates/
+keys/
+secrets/
+config/production.json
+config/secrets.json
+.secrets
+api_keys.json
+
+# =====================================
+# Development and Build Artifacts
+# =====================================
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+backup/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+*.cache
+
+# Test artifacts
+test-results/
+screenshots/
+videos/
+
+# Performance profiling
+.clinic/
+*.prof
+*.perf
+
+# Documentation builds
+docs/_build/
+site/
+
+# =====================================
+# Generated/Computed Files & Unnecessary Scripts
+# =====================================
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary development files
+comprehensive_summary.py
+fix_summary.py
+multi_dataset_summary.py
+dataset_setup_guide.py
+data_input_guide.py
+
+# IDE and development artifacts
+.kiro/
+.vscode/settings.json
+.vscode/launch.json
+
+# Plots and visualizations (keep structure, ignore temp files)
+plots/temp/
+plots/cache/
+plots/*.png
+plots/*.jpg
+plots/*.jpeg
+plots/*.pdf
+
+# Summary and report files (temporary)
+*_temp_summary.py
+*_temp_report.md
+comprehensive_summary_temp.py

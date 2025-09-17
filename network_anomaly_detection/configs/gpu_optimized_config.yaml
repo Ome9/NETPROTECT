@@ -1,0 +1,68 @@
+# GPU-Optimized Configuration for RTX 3050 Laptop
+# Experiment: gpu_optimized_autoencoder
+
+# Data configuration
+data:
+  dataset_path: "../NSL-KDD_Dataset"
+  train_file: "KDDTrain+.txt"
+  test_file: "KDDTest+.txt"
+  validation_split: 0.15  # Slightly less validation for more training data
+  batch_size: 768  # Optimized for RTX 3050 memory
+  num_workers: 4   # Optimal for data loading
+  shuffle_train: true
+
+# Model configuration  
+model:
+  type: "autoencoder"
+  input_dim: 41
+  hidden_dims: [64, 32, 16]  # Larger network for better learning
+  latent_dim: 6
+  activation: "leaky_relu"
+  use_batch_norm: true
+  dropout_rate: 0.2
+  use_skip_connections: false
+
+# Training configuration
+training:
+  num_epochs: 100
+  learning_rate: 0.002  # Higher learning rate for faster training
+  optimizer: "adamw"
+  scheduler: "cosine"
+  loss_type: "mse"
+  
+  early_stopping_patience: 20
+  min_delta: 1e-6
+  
+  gradient_clip_value: 1.0
+  weight_decay: 1e-4
+  
+  log_interval: 20  # Frequent logging for monitoring
+  save_interval: 10
+
+# GPU configuration
+device:
+  use_cuda: true
+  cuda_device: 0
+  memory_efficient: true
+
+# Evaluation configuration
+evaluation:
+  threshold_methods:
+    - "percentile_90"
+    - "percentile_95" 
+    - "percentile_98"
+    - "optimal_f1"
+    - "optimal_recall"
+    - "optimal_precision"
+  error_type: "mse"
+  save_plots: true
+  plot_format: "png"
+
+# Experiment configuration
+experiment:
+  name: "gpu_optimized_autoencoder"
+  description: "GPU-optimized autoencoder for RTX 3050 Laptop"
+  save_model: true
+  save_results: true
+
+seed: 42

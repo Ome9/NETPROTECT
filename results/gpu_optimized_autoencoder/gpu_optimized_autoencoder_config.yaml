@@ -1,0 +1,57 @@
+data:
+  batch_size: 768
+  dataset_path: ../NSL-KDD_Dataset
+  num_workers: 4
+  shuffle_train: true
+  test_file: KDDTest+.txt
+  train_file: KDDTrain+.txt
+  validation_split: 0.15
+device:
+  cuda_device: 0
+  memory_efficient: true
+  use_cuda: true
+evaluation:
+  error_type: mse
+  plot_format: png
+  save_plots: true
+  threshold_methods:
+  - percentile_90
+  - percentile_95
+  - percentile_98
+  - optimal_f1
+  - optimal_recall
+  - optimal_precision
+experiment:
+  description: GPU-optimized autoencoder for RTX 3050 Laptop
+  models_dir: ../models
+  name: gpu_optimized_autoencoder
+  plots_dir: ../plots
+  results_dir: ../results
+  save_model: true
+  save_plots: true
+  save_results: true
+model:
+  activation: leaky_relu
+  dropout_rate: 0.2
+  hidden_dims:
+  - 64
+  - 32
+  - 16
+  input_dim: 41
+  latent_dim: 6
+  type: autoencoder
+  use_batch_norm: true
+  use_skip_connections: false
+seed: 42
+training:
+  early_stopping_patience: 20
+  gradient_clip_value: 1.0
+  learning_rate: 0.002
+  log_interval: 20
+  loss_type: mse
+  min_delta: 1e-6
+  num_epochs: 50
+  optimizer: adamw
+  save_interval: 10
+  scheduler: cosine
+  weight_decay: 1e-4

@@ -1,0 +1,74 @@
+# Default configuration for autoencoder-based anomaly detection
+# Experiment: baseline_autoencoder
+
+# Data configuration
+data:
+  dataset_path: "../NSL-KDD_Dataset"
+  train_file: "KDDTrain+.txt"
+  test_file: "KDDTest+.txt"
+  validation_split: 0.2
+  batch_size: 256
+  num_workers: 4
+  shuffle_train: true
+
+# Model configuration
+model:
+  type: "autoencoder"  # Options: "autoencoder", "vae", "deep"
+  input_dim: 41  # Number of features in NSL-KDD
+  hidden_dims: [32, 24, 16]  # Hidden layer dimensions
+  latent_dim: 8
+  activation: "leaky_relu"  # Options: "relu", "leaky_relu", "elu"
+  use_batch_norm: true
+  dropout_rate: 0.2
+  use_skip_connections: false
+
+# Training configuration
+training:
+  num_epochs: 100
+  learning_rate: 0.001
+  optimizer: "adam"  # Options: "adam", "rmsprop", "sgd", "adamw"
+  scheduler: "reduce_plateau"  # Options: "reduce_plateau", "step", "cosine", null
+  loss_type: "mse"  # Options: "mse", "mae", "rmse"
+  
+  # Early stopping
+  early_stopping_patience: 15
+  min_delta: 1e-6
+  
+  # Regularization
+  gradient_clip_value: 1.0
+  weight_decay: 1e-5
+  
+  # Logging
+  log_interval: 100
+  save_interval: 10
+
+# GPU configuration
+device:
+  use_cuda: true
+  cuda_device: 0
+  memory_efficient: true  # Enable memory optimization for 4GB VRAM
+
+# Evaluation configuration
+evaluation:
+  threshold_methods:
+    - "percentile_95"
+    - "percentile_99"
+    - "optimal_f1"
+    - "optimal_precision"
+  error_type: "mse"
+  save_plots: true
+  plot_format: "png"
+
+# Experiment tracking
+experiment:
+  name: "baseline_autoencoder"
+  description: "Baseline autoencoder for NSL-KDD anomaly detection"
+  save_model: true
+  save_results: true
+  save_plots: true
+  results_dir: "../results"
+  models_dir: "../models"
+  plots_dir: "../plots"
+  
+# Random seed for reproducibility
+seed: 42

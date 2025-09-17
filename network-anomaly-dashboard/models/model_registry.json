@@ -1,0 +1,42 @@
+{
+  "models": {
+    "vae_autoencoder": {
+      "name": "VAE Autoencoder",
+      "file": "production/vae_final.pt",
+      "preprocessor": "preprocessors/vae_preprocessor.pkl",
+      "dataset": "NSL-KDD",
+      "accuracy": "95.17%",
+      "description": "Variational Autoencoder for network anomaly detection"
+    },
+    "baseline_autoencoder": {
+      "name": "Baseline Autoencoder",
+      "file": "production/baseline_final.pt",
+      "preprocessor": "preprocessors/baseline_preprocessor.pkl",
+      "dataset": "Multi-dataset",
+      "accuracy": "92.5%",
+      "description": "Standard autoencoder baseline model"
+    },
+    "improved_model": {
+      "name": "Improved GPU Model",
+      "file": "production/improved_best.pth",
+      "dataset": "CSE-CIC-IDS2018",
+      "accuracy": "90.03%",
+      "description": "GPU-optimized model with improved architecture"
+    },
+    "max_gpu_model": {
+      "name": "Max GPU Optimized",
+      "file": "production/max_gpu_best.pth",
+      "dataset": "UNSW-NB15",
+      "accuracy": "91.84%",
+      "description": "Maximum GPU utilization optimized model"
+    }
+  },
+  "production_model": {
+    "default": "vae_autoencoder",
+    "unified_script": "../unified_production_model.py",
+    "description": "Production-ready unified model with auto-detection"
+  },
+  "version": "1.0.0",
+  "created": "2025-01-17",
+  "description": "NetProtect AI Model Registry"
+}

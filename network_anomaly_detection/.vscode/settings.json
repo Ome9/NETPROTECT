@@ -1,0 +1,21 @@
+{
+    "python.analysis.extraPaths": [
+        "./src",
+        "."
+    ],
+    "python.defaultInterpreterPath": "d:/SemLiveProject/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.stubPath": "./typings",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.include": [
+        "**/*.py",
+        "src/**/*.py"
+    ],
+    "python.analysis.exclude": [
+        "**/node_modules/**",
+        "**/__pycache__/**",
+        "**/.*"
+    ]
+}
