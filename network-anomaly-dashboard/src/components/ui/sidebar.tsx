@@ -35,7 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const systemItems = [
-    { id: 'alerts', label: 'System Alerts', icon: Bell, badge: 3 },
+    { id: 'alerts', label: 'System Alerts', icon: Bell, badge: threatCount > 0 ? Math.min(threatCount, 99) : null },
     { id: 'database', label: 'Database', icon: Database, badge: null },
     { id: 'performance', label: 'Performance', icon: Activity, badge: null },
   ];
@@ -59,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* Enhanced Sidebar Toggle Button */}
       <motion.button
-        className="fixed top-6 left-6 z-60 w-12 h-12 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 text-white cursor-pointer transition-all duration-300 flex items-center justify-center group hover:bg-pink-500/20 hover:border-pink-500/50"
+        className="fixed top-6 left-6 z-[110] w-12 h-12 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 text-white cursor-pointer transition-all duration-300 flex items-center justify-center group hover:bg-pink-500/20 hover:border-pink-500/50 sidebar-toggle-btn"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[105]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -119,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Enhanced Sidebar */}
       <motion.div
-        className="fixed top-0 left-0 w-80 h-full z-50 overflow-y-auto"
+        className="fixed top-0 left-0 w-80 h-full z-[106] overflow-y-auto"
         initial={{ x: -320 }}
         animate={{ x: isOpen ? 0 : -320 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -178,7 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Enhanced Navigation Items */}
-        <nav className="p-4">
+        <nav className="p-4 pb-20"> {/* Added bottom padding to prevent overlap with footer */}
           <div className="mb-8">
             <h3 className="px-3 mb-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Main Navigation

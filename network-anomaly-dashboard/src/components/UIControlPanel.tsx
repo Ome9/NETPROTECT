@@ -10,16 +10,29 @@ import {
   Settings, Palette, Monitor, Activity,
   BarChart3, Network, Shield, Zap, RefreshCw, 
   SunMoon, Volume2, VolumeX, Bell, BellOff,
-  Grid, Layout, Maximize2, Minimize2
+  Grid, Layout, Maximize2, Minimize2, Sparkles
 } from 'lucide-react';
 
-// Inline Switch component to avoid import issues
+// Enhanced Switch component with better theming
 const Switch: React.FC<{
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
   className?: string;
-}> = ({ checked = false, onCheckedChange, disabled = false, className = '' }) => {
+  variant?: 'default' | 'neon' | 'glass';
+}> = ({ checked = false, onCheckedChange, disabled = false, className = '', variant = 'default' }) => {
+  const variantStyles = {
+    default: checked 
+      ? 'bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg shadow-blue-500/25' 
+      : 'bg-gray-700',
+    neon: checked 
+      ? 'bg-gradient-to-r from-cyan-500 to-purple-500 shadow-lg shadow-cyan-500/50 border border-cyan-400' 
+      : 'bg-slate-800 border border-slate-600',
+    glass: checked 
+      ? 'bg-white/20 backdrop-blur-lg border border-white/30 shadow-lg shadow-purple-500/25' 
+      : 'bg-black/20 backdrop-blur-lg border border-white/10'
+  };
+
   return (
     <button
       type="button"
@@ -27,27 +40,70 @@ const Switch: React.FC<{
       aria-checked={checked}
       disabled={disabled}
       className={`
-        peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full 
-        border-2 border-transparent transition-colors 
+        peer inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full 
+        border-2 border-transparent transition-all duration-300 ease-in-out
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 
         focus-visible:ring-offset-2 focus-visible:ring-offset-black 
-        disabled:cursor-not-allowed disabled:opacity-50 
-        ${checked 
-          ? 'bg-gradient-to-r from-blue-500 to-purple-600' 
-          : 'bg-gray-700'
-        } 
+        disabled:cursor-not-allowed disabled:opacity-50 hover:scale-105
+        ${variantStyles[variant]} 
         ${className}
       `}
       onClick={() => !disabled && onCheckedChange?.(!checked)}
     >
       <div
         className={`
-          pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg 
-          ring-0 transition-transform 
-          ${checked ? 'translate-x-5' : 'translate-x-0'}
+          pointer-events-none block h-5 w-5 rounded-full bg-white shadow-xl 
+          ring-0 transition-all duration-300 ease-in-out
+          ${checked ? 'translate-x-5 shadow-lg' : 'translate-x-0.5'}
+          ${variant === 'neon' && checked ? 'shadow-cyan-300/50' : ''}
         `}
       />
     </button>
+  );
+};
+
+// Enhanced Theme Button Component
+const ThemeButton: React.FC<{
+  theme: {
+    name: string;
+    color: string;
+    accent: string;
+    description: string;
+  };
+  isActive: boolean;
+  onClick: () => void;
+  variant?: 'default' | 'glass' | 'neon';
+}> = ({ theme, isActive, onClick, variant = 'default' }) => {
+  const variantClasses = {
+    default: `bg-gradient-to-br ${theme.color} hover:scale-105 hover:shadow-xl transition-all duration-300`,
+    glass: `bg-gradient-to-br ${theme.color} backdrop-blur-lg bg-opacity-20 border border-white/20 hover:border-white/40 hover:scale-105 transition-all duration-300`,
+    neon: `bg-gradient-to-br ${theme.color} border-2 border-transparent hover:border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 relative overflow-hidden`
+  };
+
+  return (
+    <div className="relative group">
+      <Button
+        variant="ghost"
+        className={`h-20 w-full text-white relative overflow-hidden ${variantClasses[variant]} ${
+          isActive ? 'ring-2 ring-white/50 shadow-lg' : ''
+        }`}
+        onClick={onClick}
+      >
+        {variant === 'neon' && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+        )}
+        <div className="flex flex-col items-center justify-center relative z-10">
+          <div className="text-sm font-bold mb-1">{theme.name}</div>
+          <div className="text-xs opacity-80">{theme.description}</div>
+        </div>
+        {isActive && (
+          <>
+            <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full animate-pulse shadow-lg"></div>
+            <Sparkles className="absolute bottom-2 left-2 h-4 w-4 text-white/80 animate-pulse" />
+          </>
+        )}
+      </Button>
+    </div>
   );
 };
 
@@ -66,6 +122,7 @@ interface UIControlPanelProps {
     fullscreenMode: boolean;
     gridDensity: 'compact' | 'normal' | 'spacious';
     colorTheme: string;
+    landingPageTheme: 'modern' | 'meta-droid';
     soundEnabled: boolean;
     notifications: boolean;
     alertLevel: 'low' | 'medium' | 'high';
@@ -108,20 +165,23 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
   const updateSetting = useCallback((key: string, value: boolean | string | number) => {
     console.log('🎛️ UI Control Update:', { key, value, currentSettings });
     
-    // Call the parent's setting change handler
+    // Call the parent's setting change handler immediately
     onSettingChange?.(key, value);
     
     // Trigger specific callbacks for external components
     if (key === 'darkMode') {
       onThemeChange?.(value ? 'dark' : 'light');
     }
-    if (key === 'gridDensity' || key === 'sidebarCollapsed') {
+    if (key === 'gridDensity' || key === 'sidebarCollapsed' || key === 'fullscreenMode' || key === 'compactMode') {
       onLayoutChange?.(key);
     }
     if (key.endsWith('Metrics') || key.endsWith('Topology') || key.endsWith('Detection') || 
         key.endsWith('Analysis') || key.endsWith('Monitoring') || key.endsWith('configuration')) {
       onSectionToggle?.(key, value as boolean);
     }
+    
+    // Force update notification
+    console.log('✅ Setting update completed:', { key, value });
   }, [onThemeChange, onLayoutChange, onSectionToggle, onSettingChange, currentSettings]);
 
   const controlSections = [
@@ -201,50 +261,53 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
 
       {/* Color Themes */}
       <div className="space-y-4">
-        <h4 className="text-white font-medium">Color Themes</h4>
-        <div className="grid grid-cols-2 gap-3">
+        <h4 className="text-white font-medium flex items-center gap-2">
+          <Palette className="h-5 w-5" />
+          Color Themes
+        </h4>
+        <div className="grid grid-cols-2 gap-4">
           {[
             { 
               name: 'Cyberpunk', 
-              color: 'from-purple-500 via-pink-500 to-red-500',
+              color: 'from-purple-900 via-pink-800 to-purple-900',
               accent: '#ff00ff',
-              description: 'Futuristic neon vibes'
+              description: 'Electric vibes'
             },
             { 
               name: 'Ocean Blue', 
-              color: 'from-blue-600 via-cyan-500 to-teal-400',
+              color: 'from-blue-900 via-cyan-800 to-blue-900',
               accent: '#0ea5e9',
-              description: 'Deep ocean depths'
+              description: 'Deep ocean'
             },
             { 
               name: 'Forest Green', 
-              color: 'from-emerald-600 via-green-500 to-lime-400',
+              color: 'from-green-900 via-emerald-800 to-green-900',
               accent: '#10b981',
-              description: 'Nature\'s serenity'
+              description: 'Natural harmony'
             },
             { 
               name: 'Sunset Orange', 
-              color: 'from-orange-500 via-red-500 to-pink-500',
+              color: 'from-orange-900 via-red-800 to-orange-900',
               accent: '#f97316',
-              description: 'Warm twilight glow'
+              description: 'Warm glow'
             },
             { 
               name: 'Purple Galaxy', 
-              color: 'from-indigo-600 via-purple-600 to-pink-600',
+              color: 'from-violet-900 via-purple-800 to-indigo-900',
               accent: '#8b5cf6',
-              description: 'Cosmic wonder'
+              description: 'Cosmic energy'
             },
             { 
               name: 'Arctic Ice', 
-              color: 'from-slate-400 via-blue-300 to-cyan-200',
+              color: 'from-slate-800 via-blue-900 to-slate-800',
               accent: '#64748b',
-              description: 'Cool crystalline'
+              description: 'Cool elegance'
             },
             { 
               name: 'Golden Hour', 
-              color: 'from-amber-500 via-orange-400 to-yellow-300',
+              color: 'from-yellow-800 via-orange-700 to-amber-800',
               accent: '#f59e0b',
-              description: 'Warm golden light'
+              description: 'Warm radiance'
             },
             { 
               name: 'Midnight', 
@@ -252,23 +315,43 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
               accent: '#374151',
               description: 'Dark elegance'
             }
-          ].map(theme => (
-            <div key={theme.name} className="relative group">
-              <Button
-                variant="ghost"
-                className={`h-16 w-full bg-gradient-to-r ${theme.color} text-white hover:opacity-80 hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden ${
-                  currentSettings?.colorTheme === theme.name.toLowerCase() ? 'ring-2 ring-white ring-opacity-50' : ''
-                }`}
-                onClick={() => updateSetting('colorTheme', theme.name.toLowerCase())}
-              >
-                <div className="text-sm font-bold">{theme.name}</div>
-                <div className="text-xs opacity-80">{theme.description}</div>
-                {currentSettings?.colorTheme === theme.name.toLowerCase() && (
-                  <div className="absolute top-1 right-1 w-3 h-3 bg-white rounded-full"></div>
-                )}
-              </Button>
-            </div>
+          ].map((theme, index) => (
+            <ThemeButton
+              key={theme.name}
+              theme={theme}
+              isActive={currentSettings?.colorTheme === theme.name.toLowerCase()}
+              onClick={() => updateSetting('colorTheme', theme.name.toLowerCase())}
+              variant={index % 3 === 0 ? 'neon' : index % 2 === 0 ? 'glass' : 'default'}
+            />
           ))}
+        </div>
+      </div>
+
+      {/* Landing Page Themes */}
+      <div className="space-y-4">
+        <h4 className="text-white font-medium flex items-center gap-2">
+          <Layout className="h-5 w-5" />
+          Landing Page Theme
+        </h4>
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            variant={(currentSettings?.landingPageTheme || 'modern') === 'modern' ? "neon" : "outline"}
+            className="flex flex-col items-center p-4 h-auto"
+            onClick={() => updateSetting('landingPageTheme', 'modern')}
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-500 rounded mb-2" />
+            <span className="text-sm">Modern</span>
+            <span className="text-xs text-gray-400">Cyberpunk style</span>
+          </Button>
+          <Button
+            variant={(currentSettings?.landingPageTheme || 'modern') === 'meta-droid' ? "neon" : "outline"}
+            className="flex flex-col items-center p-4 h-auto"
+            onClick={() => updateSetting('landingPageTheme', 'meta-droid')}
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded mb-2" />
+            <span className="text-sm">Meta-Droid</span>
+            <span className="text-xs text-gray-400">Futuristic design</span>
+          </Button>
         </div>
       </div>
     </div>
@@ -277,12 +360,16 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
   const renderLayoutControls = () => (
     <div className="space-y-6">
       <div className="space-y-4">
-        <h4 className="text-white font-medium">Layout Options</h4>
+        <h4 className="text-white font-medium flex items-center gap-2">
+          <Layout className="h-5 w-5" />
+          Layout Options
+        </h4>
         <div className="flex items-center justify-between">
           <span className="text-gray-300">Compact Mode</span>
           <Switch 
             checked={currentSettings?.compactMode || false}
             onCheckedChange={(checked: boolean) => updateSetting('compactMode', checked)}
+            variant="neon"
           />
         </div>
         <div className="flex items-center justify-between">
@@ -290,6 +377,7 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
           <Switch 
             checked={currentSettings?.sidebarCollapsed || false}
             onCheckedChange={(checked: boolean) => updateSetting('sidebarCollapsed', checked)}
+            variant="glass"
           />
         </div>
         <div className="flex items-center justify-between">
@@ -297,6 +385,7 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
           <Switch 
             checked={currentSettings?.fullscreenMode || false}
             onCheckedChange={(checked: boolean) => updateSetting('fullscreenMode', checked)}
+            variant="default"
           />
         </div>
       </div>
@@ -311,7 +400,7 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
           ].map(option => (
             <Button
               key={option.value}
-              variant={currentSettings?.gridDensity === option.value ? "rainbow" : "ghost"}
+              variant={currentSettings?.gridDensity === option.value ? "default" : "ghost"}
               className="flex flex-col items-center p-3 h-auto"
               onClick={() => updateSetting('gridDensity', option.value)}
             >
@@ -431,13 +520,13 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
       </div>
 
       <Button 
-        variant="rainbow" 
+        variant="default" 
         className="w-full"
         onClick={() => {
           // Reset to default values
-          onSettingChange?.('refreshRate', 5);
-          onSettingChange?.('dataRetention', 24);
-          onSettingChange?.('realtimeUpdates', true);
+          updateSetting('refreshRate', 5);
+          updateSetting('dataRetention', 24);
+          updateSetting('realtimeUpdates', true);
         }}
       >
         <RefreshCw className="h-4 w-4 mr-2" />
@@ -485,7 +574,7 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
               {controlSections.map((section) => (
                 <Button
                   key={section.id}
-                  variant={activeSection === section.id ? "rainbow" : "ghost"}
+                  variant={activeSection === section.id ? "default" : "ghost"}
                   className="w-full justify-start p-3 h-auto"
                   onClick={() => setActiveSection(section.id)}
                 >
@@ -532,7 +621,7 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
       </div>
 
       {/* Quick Actions */}
-      <Card variant="rainbow">
+      <Card variant="glass">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Zap className="h-5 w-5" />
@@ -553,7 +642,7 @@ export const UIControlPanel: React.FC<UIControlPanelProps> = ({
               {currentSettings?.soundEnabled ? <Volume2 className="h-4 w-4 mr-2" /> : <VolumeX className="h-4 w-4 mr-2" />}
               {currentSettings?.soundEnabled ? 'Mute' : 'Unmute'} Sounds
             </Button>
-            <Button variant="rainbow" onClick={() => updateSetting('fullscreenMode', !(currentSettings?.fullscreenMode || false))}>
+            <Button variant="default" onClick={() => updateSetting('fullscreenMode', !(currentSettings?.fullscreenMode || false))}>
               <Maximize2 className="h-4 w-4 mr-2" />
               Toggle Fullscreen
             </Button>

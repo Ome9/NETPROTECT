@@ -13,10 +13,24 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { networkAPI } from '../lib/api';
+import dynamic from 'next/dynamic';
 import { 
   Activity, BarChart3, TrendingUp, 
   Globe, Wifi, Network, Eye
 } from 'lucide-react';
+
+// Dynamically import the Leaflet component to prevent SSR issues
+const LeafletWorldMap = dynamic(() => import('./LeafletWorldMap').then(mod => ({ default: mod.LeafletWorldMap })), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-96 rounded-lg border border-gray-600 bg-gray-800 flex items-center justify-center">
+      <div className="text-gray-400 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-2"></div>
+        <p>Loading Interactive World Map...</p>
+      </div>
+    </div>
+  )
+});
 
 interface TrafficData {
   timestamp: number;
@@ -97,16 +111,18 @@ export const AdvancedTrafficAnalyzer: React.FC<AdvancedTrafficAnalyzerProps> = (
           
           for (let i = 0; i < points; i++) {
             const timestamp = now - (points - i) * interval;
-            const variation = 0.8 + (Math.sin(i * 0.2) * 0.2); // Natural variation
+            // Use realistic variation based on data position instead of sine waves
+            const dataPosition = i / points; // 0 to 1
+            const recentDataWeight = 0.8 + (dataPosition * 0.4); // More recent data has more weight
             
             data.push({
               timestamp,
-              totalBytes: Math.floor(currentValue * variation),
-              incomingBytes: Math.floor(realTraffic.incomingBytes * variation),
-              outgoingBytes: Math.floor(realTraffic.outgoingBytes * variation),
-              packetsPerSecond: Math.floor(realTraffic.packetsPerSecond * variation),
-              connectionsActive: Math.floor(realTraffic.connectionsActive * (0.9 + Math.random() * 0.2)),
-              bandwidthUtilization: Math.max(0, Math.min(100, realTraffic.bandwidthUtilization * variation))
+              totalBytes: Math.floor(currentValue * recentDataWeight),
+              incomingBytes: Math.floor(realTraffic.incomingBytes * recentDataWeight),
+              outgoingBytes: Math.floor(realTraffic.outgoingBytes * recentDataWeight),
+              packetsPerSecond: Math.floor(realTraffic.packetsPerSecond * recentDataWeight),
+              connectionsActive: Math.floor(realTraffic.connectionsActive * recentDataWeight),
+              bandwidthUtilization: Math.max(0, Math.min(100, realTraffic.bandwidthUtilization * recentDataWeight))
             });
           }
           
@@ -120,14 +136,14 @@ export const AdvancedTrafficAnalyzer: React.FC<AdvancedTrafficAnalyzerProps> = (
         const historicalData = generateRealisticHistory(realTraffic.totalBytes, points);
         setTrafficData(historicalData);
 
-        // Update network stats with real data
+        // Update network stats with real data only - no random values
         setNetworkStats({
           totalConnections: realTraffic.connectionsActive,
           peakBandwidth: Math.max(realTraffic.totalBytes / 1000000, 0.1), // Convert to MB
-          averageLatency: Math.max(5, Math.min(50, 15 + Math.sin(Date.now() / 120000) * 8)), // Realistic latency 5-50ms
-          packetLoss: Math.max(0, Math.min(2, realTraffic.bandwidthUtilization > 80 ? 0.5 + Math.random() * 1 : Math.random() * 0.3)),
-          jitter: Math.max(0.5, Math.min(8, 2 + Math.sin(Date.now() / 180000) * 3)), // Realistic jitter 0.5-8ms
-          connectionErrors: Math.floor(realTraffic.connectionsActive > 200 ? Math.random() * 5 : Math.random() * 2)
+          averageLatency: 15, // Static default - should be from real monitoring
+          packetLoss: 0, // Static default - should be from real monitoring  
+          jitter: 2, // Static default - should be from real monitoring
+          connectionErrors: 0 // Static default - should be from real monitoring
         });
 
       } catch (error) {
@@ -404,46 +420,115 @@ export const AdvancedTrafficAnalyzer: React.FC<AdvancedTrafficAnalyzerProps> = (
     </div>
   );
 
-  const renderGeographicAnalysis = () => (
-    <div className="space-y-4">
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-gray-200 text-sm flex items-center gap-2">
-            <Globe className="h-4 w-4 text-green-400" />
-            Geographic Traffic Analysis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {geographicData.map((country, index) => {
-              const threatLevel = (country.suspicious / country.requests) * 100;
-              return (
-                <div key={country.country} className="flex items-center justify-between p-2 rounded-lg bg-gray-900/30">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-300">{country.country}</span>
-                      <Badge 
-                        variant={threatLevel > 5 ? 'destructive' : threatLevel > 1 ? 'secondary' : 'default'}
-                        className="text-xs"
-                      >
-                        {threatLevel > 5 ? 'HIGH RISK' : threatLevel > 1 ? 'MEDIUM' : 'LOW RISK'}
-                      </Badge>
+  const renderGeographicAnalysis = () => {
+    return (
+      <div className="space-y-4">
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-gray-200 text-sm flex items-center gap-2">
+              <Globe className="h-4 w-4 text-green-400" />
+              Geographic Traffic Analysis - Interactive World Map
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Leaflet World Map */}
+              <div className="w-full">
+                <LeafletWorldMap 
+                  geographicData={geographicData} 
+                  className="shadow-lg shadow-cyan-500/20" 
+                />
+              </div>
+              
+              {/* Geographic Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <Card className="bg-gray-900/50 border-gray-600">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-400">Total Locations</p>
+                        <p className="text-2xl font-bold text-blue-400">{geographicData.length}</p>
+                      </div>
+                      <Globe className="h-8 w-8 text-blue-400/60" />
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {country.requests.toLocaleString()} requests • {country.suspicious} suspicious
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gray-900/50 border-gray-600">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-400">Total Requests</p>
+                        <p className="text-2xl font-bold text-green-400">
+                          {geographicData.reduce((sum, country) => sum + country.requests, 0).toLocaleString()}
+                        </p>
+                      </div>
+                      <Activity className="h-8 w-8 text-green-400/60" />
                     </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gray-900/50 border-gray-600">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-400">Suspicious Activity</p>
+                        <p className="text-2xl font-bold text-red-400">
+                          {geographicData.reduce((sum, country) => sum + country.suspicious, 0)}
+                        </p>
+                      </div>
+                      <Eye className="h-8 w-8 text-red-400/60" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Top Risk Countries */}
+              <Card className="bg-gray-900/50 border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-sm text-gray-300">🔴 Highest Risk Locations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {geographicData
+                      .sort((a, b) => (b.suspicious / b.requests) - (a.suspicious / a.requests))
+                      .slice(0, 5)
+                      .map((country, index) => {
+                        const threatLevel = (country.suspicious / country.requests) * 100;
+                        return (
+                          <div key={country.country} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-bold text-gray-400 w-6">#{index + 1}</span>
+                              <div>
+                                <span className="text-sm font-medium text-gray-300">{country.country}</span>
+                                <div className="text-xs text-gray-500">
+                                  {country.requests.toLocaleString()} requests • {country.suspicious} suspicious
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant={threatLevel > 10 ? 'destructive' : threatLevel > 5 ? 'secondary' : 'default'}
+                                className="text-xs"
+                              >
+                                {threatLevel > 10 ? 'HIGH' : threatLevel > 5 ? 'MEDIUM' : 'LOW'}
+                              </Badge>
+                              <span className="text-sm font-bold text-gray-300 min-w-[50px] text-right">
+                                {threatLevel.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
-                  <div className="w-24">
-                    <Progress value={threatLevel * 5} className="h-2" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
 
   return (
     <motion.div 

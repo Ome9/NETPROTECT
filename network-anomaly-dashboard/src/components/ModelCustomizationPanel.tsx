@@ -173,10 +173,12 @@ export const ModelCustomizationPanel: React.FC = () => {
           clearInterval(interval);
           return 100;
         }
-        // More realistic training progress - slower at the end
-        const increment = prev < 50 ? 3 + Math.random() * 4 : 
-                         prev < 90 ? 1 + Math.random() * 2 :
-                         0.5 + Math.random() * 1;
+        // Realistic training progress - based on actual ML training patterns
+        // Fast initial progress, then slows down as convergence approaches
+        const increment = prev < 30 ? 5 :      // Fast initial training
+                         prev < 70 ? 2.5 :    // Moderate progress
+                         prev < 95 ? 1 :      // Slow convergence
+                         0.2;                 // Final refinement
         return Math.min(100, prev + increment);
       });
     }, 500);

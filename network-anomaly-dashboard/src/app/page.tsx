@@ -23,11 +23,13 @@ import { MLModelMonitoring } from '@/components/MLModelMonitoring';
 import { AdvancedTrafficAnalyzer } from '@/components/AdvancedTrafficAnalyzer';
 import { ModelCustomizationPanel } from '@/components/ModelCustomizationPanel';
 import { EnhancedSystemMetrics } from '@/components/EnhancedSystemMetrics';
+import { LandingPageNew } from '@/components/LandingPageNew';
+import { MetaDroidLanding } from '@/components/MetaDroidLanding';
 
 export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
-  const [currentView, setCurrentView] = useState<'overview' | 'topology' | 'threats' | 'model' | 'traffic' | 'config' | 'controls'>('overview');
+  const [currentView, setCurrentView] = useState<'overview' | 'landing' | 'topology' | 'threats' | 'model' | 'traffic' | 'config' | 'controls'>('landing');
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [isMaximized, setIsMaximized] = useState(false);
   const [topologyNodes, setTopologyNodes] = useState<Array<{
@@ -70,11 +72,12 @@ export default function Dashboard() {
     compactMode: false,
     animations: true,
     transparency: 85,
-    glowEffects: true,
+    glowEffects: false,
     sidebarCollapsed: false,
     fullscreenMode: false,
     gridDensity: 'normal' as 'compact' | 'normal' | 'spacious',
     colorTheme: 'cyberpunk',
+    landingPageTheme: 'modern' as 'modern' | 'meta-droid',
     soundEnabled: true,
     notifications: true,
     alertLevel: 'medium' as 'low' | 'medium' | 'high',
@@ -100,11 +103,16 @@ export default function Dashboard() {
     // Function to fetch real system metrics from backend API
     const fetchRealSystemMetrics = async () => {
       try {
+        console.log('Connecting to backend for real system metrics...');
         const { networkAPI } = await import('../lib/api');
         const realMetrics = await networkAPI.getCurrentNetworkData();
         const networkStatus = await networkAPI.getNetworkStatus();
         const topology = await networkAPI.getNetworkTopology();
         const threats = await networkAPI.getCurrentThreats();
+        
+        console.log('Backend API Response - realMetrics:', realMetrics);
+        console.log('Backend API Response - networkStatus:', networkStatus);
+        console.log('Backend API Response - threats:', threats);
         
         setConnectionCount(networkStatus.activeConnections);
         setTopologyNodes(topology.nodes);
@@ -119,9 +127,13 @@ export default function Dashboard() {
           activeConnections: networkStatus.activeConnections,
           modelAccuracy: realMetrics.modelAccuracy
         });
+        console.log('✅ Successfully loaded REAL system metrics from backend');
       } catch (error) {
-        console.error('Failed to fetch real system metrics:', error);
-        // Fallback to safe default values (not random)
+        console.error('❌ Failed to connect to backend for real system metrics:', error);
+        console.log('Make sure the backend server is running on port 3001');
+        
+        // Set connection status to disconnected when backend fails
+        setIsConnected(false);
         setConnectionCount(0);
         setTopologyNodes([]);
         setThreatData([]);
@@ -342,7 +354,7 @@ export default function Dashboard() {
         >
           <Card 
             variant="glass" 
-            className={`group transition-all duration-300 hover-rainbow-border ${getElementClasses('network-status')} ${
+            className={`group transition-all duration-300 ${getElementClasses('network-status')} ${
               uiSettings.glowEffects ? 'hover:neon-glow-blue' : ''
             }`}
             style={{
@@ -389,7 +401,7 @@ export default function Dashboard() {
         >
           <Card 
             variant="glass" 
-            className={`group transition-all duration-300 hover-rainbow-border ${getElementClasses('threat-level')} ${
+            className={`group transition-all duration-300 ${getElementClasses('threat-level')} ${
               uiSettings.glowEffects ? 'hover:neon-glow-red' : ''
             }`}
             style={{
@@ -438,7 +450,7 @@ export default function Dashboard() {
         >
           <Card 
             variant="glass" 
-            className={`group hover:neon-glow-green transition-all duration-300 hover-rainbow-border ${getElementClasses('system-load')}`}
+            className={`group ${uiSettings.glowEffects ? 'hover:neon-glow-green' : ''} transition-all duration-300 ${getElementClasses('system-load')}`}
           >
             {selectedElement === 'system-load' && isMaximized && (
               <button 
@@ -468,7 +480,7 @@ export default function Dashboard() {
         >
           <Card 
             variant="glass" 
-            className={`group hover:neon-glow-purple transition-all duration-300 hover-rainbow-border ${getElementClasses('ml-model')}`}
+            className={`group ${uiSettings.glowEffects ? 'hover:neon-glow-purple' : ''} transition-all duration-300 ${getElementClasses('ml-model')}`}
           >
             {selectedElement === 'ml-model' && isMaximized && (
               <button 
@@ -484,8 +496,8 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="text-2xl font-bold text-purple-400">Active</div>
-              <p className="text-xs text-gray-400">94.2% accuracy</p>
-              <Progress value={94.2} variant="neon" glowColor="purple" className="mt-2 h-2" />
+              <p className="text-xs text-gray-400">{systemMetrics.modelAccuracy.toFixed(1)}% accuracy</p>
+              <Progress value={systemMetrics.modelAccuracy} variant="neon" glowColor="purple" className="mt-2 h-2" />
             </CardContent>
           </Card>
         </motion.div>
@@ -507,26 +519,56 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <motion.div 
-                  className="flex items-center justify-between p-3 glass-effect rounded-lg border border-red-500/30"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div>
-                    <span className="text-sm text-red-300 font-medium">Suspicious activity detected</span>
-                    <p className="text-xs text-gray-400">192.168.1.150 - Unusual port scanning</p>
-                  </div>
-                  <Badge variant="pulse" className="text-xs">CRITICAL</Badge>
-                </motion.div>
-                <motion.div 
-                  className="flex items-center justify-between p-3 glass-effect rounded-lg border border-yellow-500/30"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div>
-                    <span className="text-sm text-yellow-300 font-medium">Anomaly pattern identified</span>
-                    <p className="text-xs text-gray-400">10.0.0.50 - High bandwidth usage</p>
-                  </div>
-                  <Badge variant="neon" className="text-xs">MEDIUM</Badge>
-                </motion.div>
+                {threatData.length > 0 ? (
+                  threatData.slice(0, 2).map((threat) => (
+                    <motion.div
+                      key={threat.id}
+                      className={`flex items-center justify-between p-3 glass-effect rounded-lg border ${
+                        threat.severity === 'critical' ? 'border-red-500/30' :
+                        threat.severity === 'high' ? 'border-orange-500/30' :
+                        threat.severity === 'medium' ? 'border-yellow-500/30' :
+                        'border-blue-500/30'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <div>
+                        <span className={`text-sm font-medium ${
+                          threat.severity === 'critical' ? 'text-red-300' :
+                          threat.severity === 'high' ? 'text-orange-300' :
+                          threat.severity === 'medium' ? 'text-yellow-300' :
+                          'text-blue-300'
+                        }`}>
+                          {threat.description}
+                        </span>
+                        <p className="text-xs text-gray-400">
+                          {threat.sourceIp} - {threat.type.replace('_', ' ')} ({threat.confidence.toFixed(1)}% confidence)
+                        </p>
+                      </div>
+                      <Badge 
+                        variant={
+                          threat.severity === 'critical' ? 'pulse' :
+                          threat.severity === 'high' ? 'destructive' :
+                          threat.severity === 'medium' ? 'neon' :
+                          'glass'
+                        } 
+                        className="text-xs"
+                      >
+                        {threat.severity.toUpperCase()}
+                      </Badge>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div 
+                    className="flex items-center justify-between p-3 glass-effect rounded-lg border border-green-500/30"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div>
+                      <span className="text-sm text-green-300 font-medium">System secure</span>
+                      <p className="text-xs text-gray-400">No active threats detected</p>
+                    </div>
+                    <Badge variant="glass" className="text-xs">SECURE</Badge>
+                  </motion.div>
+                )}
               </div>
               <Button 
                 variant="glass" 
@@ -733,8 +775,12 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'overview' | 'topology' | 'threats' | 'model' | 'traffic' | 'config' | 'controls')} className="w-full">
-              <TabsList className="grid w-full grid-cols-7 glass-effect">
+            <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'overview' | 'landing' | 'topology' | 'threats' | 'model' | 'traffic' | 'config' | 'controls')} className="w-full">
+              <TabsList className="grid w-full grid-cols-8 glass-effect">
+                <TabsTrigger value="landing" className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Welcome
+                </TabsTrigger>
                 <TabsTrigger value="overview" className="flex items-center gap-2">
                   <Activity className="h-4 w-4" />
                   Overview
@@ -777,6 +823,22 @@ export default function Dashboard() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
+              {currentView === 'landing' && (
+                <>
+                  {(uiSettings.landingPageTheme || 'modern') === 'meta-droid' ? (
+                    <MetaDroidLanding
+                      systemMetrics={systemMetrics}
+                      onViewChange={(view: string) => setCurrentView(view as any)}
+                    />
+                  ) : (
+                    <LandingPageNew
+                      systemMetrics={systemMetrics}
+                      onViewChange={(view: string) => setCurrentView(view as any)}
+                    />
+                  )}
+                </>
+              )}
+
               {currentView === 'overview' && renderOverview()}
               
               {currentView === 'topology' && visibleSections.networkTopology && (
@@ -835,6 +897,7 @@ export default function Dashboard() {
                     document.documentElement.classList.toggle('light', theme === 'light');
                   }}
                   onLayoutChange={(layout) => {
+                    console.log('🎛️ Layout Change:', layout);
                     if (layout === 'compactMode') {
                       setUiSettings(prev => ({ ...prev, compactMode: !prev.compactMode }));
                     } else if (layout === 'sidebarCollapsed') {
@@ -846,6 +909,9 @@ export default function Dashboard() {
                       } else {
                         document.exitFullscreen?.();
                       }
+                    } else if (layout === 'gridDensity') {
+                      // This will be handled by the settings change handler
+                      console.log('🎛️ Grid density change handled by settings');
                     }
                   }}
                   onSectionToggle={(sectionId, enabled) => {

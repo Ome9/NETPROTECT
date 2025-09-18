@@ -30,18 +30,8 @@ export const NetworkTopologyVisualizer: React.FC<NetworkTopologyProps> = ({
 }) => {
   const [selectedNode, setSelectedNode] = useState<NetworkNode | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'topology'>('topology');
-  
-  // Generate mock nodes if none provided
-  const mockNodes: NetworkNode[] = [
-    { id: '1', ip: '192.168.1.1', type: 'router', status: 'normal', connections: 45, lastSeen: Date.now() - 1000, riskScore: 0.1 },
-    { id: '2', ip: '192.168.1.100', type: 'server', status: 'suspicious', connections: 23, lastSeen: Date.now() - 5000, riskScore: 0.7 },
-    { id: '3', ip: '192.168.1.150', type: 'workstation', status: 'threat', connections: 12, lastSeen: Date.now() - 2000, riskScore: 0.9 },
-    { id: '4', ip: '192.168.1.200', type: 'workstation', status: 'normal', connections: 8, lastSeen: Date.now() - 3000, riskScore: 0.2 },
-    { id: '5', ip: '10.0.0.50', type: 'server', status: 'suspicious', connections: 67, lastSeen: Date.now() - 1500, riskScore: 0.6 },
-    { id: '6', ip: '172.16.0.10', type: 'unknown', status: 'threat', connections: 89, lastSeen: Date.now() - 500, riskScore: 0.95 },
-  ];
-
-  const displayNodes = nodes.length > 0 ? nodes : mockNodes;
+  // Use only real nodes data - no fallback mock data
+  const displayNodes = nodes;
 
   const getNodeColor = (status: string) => {
     switch (status) {

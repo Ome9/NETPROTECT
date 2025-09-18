@@ -81,14 +81,14 @@ router.get('/network/current', async (req: Request, res: Response) => {
     console.error('Error getting current system metrics:', error);
     res.status(500).json({ 
       error: 'Failed to get current system metrics',
-      cpuUsage: 25,
-      memoryUsage: 68,
-      networkLoad: 45,
-      diskUsage: 45,
-      gpuUsage: 12,
-      threatsBlocked: 200,
-      activeConnections: 150,
-      modelAccuracy: 0.95
+      cpuUsage: 0,
+      memoryUsage: 0,
+      networkLoad: 0,
+      diskUsage: 0,
+      gpuUsage: 0,
+      threatsBlocked: 0, // Real value - no threats if monitoring failed
+      activeConnections: 0,
+      modelAccuracy: 0.0
     });
   }
 });

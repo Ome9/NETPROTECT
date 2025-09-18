@@ -114,16 +114,8 @@ export class NetworkAPI {
       }
       return await response.json();
     } catch (error) {
-      console.error('Failed to fetch network status:', error);
-      // Return fallback data if API is unavailable
-      return {
-        isMonitoring: false,
-        activeConnections: 0,
-        packetsPerSecond: 0,
-        bytesPerSecond: 0,
-        networkInterfaces: ['Ethernet', 'Wi-Fi'],
-        selectedInterface: 'Ethernet'
-      };
+      console.error('Failed to fetch network status from backend:', error);
+      throw new Error(`Backend not accessible: ${error}`);
     }
   }
 
@@ -135,18 +127,9 @@ export class NetworkAPI {
       }
       return await response.json();
     } catch (error) {
-      console.error('Failed to fetch current network data:', error);
-      // Return fallback data if API is unavailable
-      return {
-        cpuUsage: 0,
-        memoryUsage: 0,
-        networkLoad: 0,
-        diskUsage: 0,
-        gpuUsage: 0,
-        threatsBlocked: 0,
-        activeConnections: 0,
-        modelAccuracy: 0
-      };
+      console.error('Failed to fetch current network data from backend:', error);
+      // Don't provide fallback data - let the error propagate so user knows backend is not connected
+      throw new Error(`Backend not accessible: ${error}`);
     }
   }
 
@@ -264,13 +247,8 @@ export class NetworkAPI {
         activeMonitoring: data.activeMonitoring || false
       };
     } catch (error) {
-      console.error('Failed to fetch current threats:', error);
-      // Return fallback data if API is unavailable
-      return {
-        threats: [],
-        totalThreats: 0,
-        activeMonitoring: false
-      };
+      console.error('Failed to fetch current threats from backend:', error);
+      throw new Error(`Backend not accessible: ${error}`);
     }
   }
 

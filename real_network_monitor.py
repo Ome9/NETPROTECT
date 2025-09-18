@@ -375,4 +375,54 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Real-time Network Anomaly Detection System')
+    parser.add_argument('--single-check', action='store_true', help='Run single check and return JSON data')
+    args = parser.parse_args()
+    
+    if args.single_check:
+        # Single check mode for backend integration
+        monitor = RealPCNetworkMonitor()
+        try:
+            metrics = monitor.get_real_system_metrics()
+            threats = monitor.detect_suspicious_activity(metrics)
+            
+            # Count threats for backend
+            threat_count = 0
+            active_threats = 0
+            
+            if threats['threat_level'] in ['HIGH', 'CRITICAL']:
+                threat_count += 2
+                active_threats += 1
+            elif threats['threat_level'] in ['MEDIUM']:
+                threat_count += 1
+            
+            # Check for suspicious network activity
+            if metrics.get('connection_count', 0) > 200:
+                threat_count += 1
+                active_threats += 1
+                
+            if metrics.get('bytes_sent', 0) > 1000000:  # 1MB outgoing
+                threat_count += 1
+                
+            result = {
+                'timestamp': datetime.now().isoformat(),
+                'metrics': metrics,
+                'threats': {
+                    'threat_level': threats['threat_level'],
+                    'risk_score': threats['risk_score'],
+                    'threats_blocked': max(0, threat_count - active_threats),
+                    'active_threats': active_threats,
+                    'total_threats': threat_count
+                }
+            }
+            
+            print(json.dumps(result))
+            sys.exit(0)
+            
+        except Exception as e:
+            print(json.dumps({'error': str(e)}))
+            sys.exit(1)
+    else:
+        main()

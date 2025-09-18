@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { UIThemeSelector } from '@/components/UIThemeSelector';
 import { 
   Shield, 
   Activity, 
@@ -45,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50"
+      className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-[50]"
     >
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
@@ -99,6 +100,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Section - Status & User */}
           <div className="flex items-center gap-4">
+            
+            {/* Theme Selector */}
+            <UIThemeSelector />
+
+            <Separator orientation="vertical" className="h-6 bg-gray-600" />
             
             {/* System Status */}
             <div className="flex items-center gap-2">

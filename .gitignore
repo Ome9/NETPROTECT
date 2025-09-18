@@ -40,6 +40,7 @@ $RECYCLE.BIN/
 
 # dependencies
 network-anomaly-dashboard/node_modules/
+network-anomaly-dashboard/backend/node_modules/
 network-anomaly-dashboard/.pnp
 network-anomaly-dashboard/.pnp.*
 network-anomaly-dashboard/.yarn/*
@@ -52,12 +53,19 @@ network-anomaly-dashboard/.yarn/*
 network-anomaly-dashboard/.next/
 network-anomaly-dashboard/out/
 network-anomaly-dashboard/build/
+network-anomaly-dashboard/dist/
+
+# backend build output
+network-anomaly-dashboard/backend/dist/
+network-anomaly-dashboard/backend/build/
 
 # testing
 network-anomaly-dashboard/coverage/
+network-anomaly-dashboard/backend/coverage/
 
 # typescript
 network-anomaly-dashboard/*.tsbuildinfo
+network-anomaly-dashboard/backend/*.tsbuildinfo
 network-anomaly-dashboard/next-env.d.ts
 
 # debug logs
@@ -65,12 +73,28 @@ network-anomaly-dashboard/npm-debug.log*
 network-anomaly-dashboard/yarn-debug.log*
 network-anomaly-dashboard/yarn-error.log*
 network-anomaly-dashboard/.pnpm-debug.log*
+network-anomaly-dashboard/backend/npm-debug.log*
+network-anomaly-dashboard/backend/yarn-debug.log*
+network-anomaly-dashboard/backend/yarn-error.log*
+network-anomaly-dashboard/backend/.pnpm-debug.log*
 
 # env files
 network-anomaly-dashboard/.env*
+network-anomaly-dashboard/backend/.env*
 
 # vercel
 network-anomaly-dashboard/.vercel
+
+# turbopack cache
+network-anomaly-dashboard/.turbo/
+
+# package manager lock files (keep only one)
+network-anomaly-dashboard/package-lock.json
+network-anomaly-dashboard/yarn.lock
+network-anomaly-dashboard/pnpm-lock.yaml
+network-anomaly-dashboard/backend/package-lock.json
+network-anomaly-dashboard/backend/yarn.lock
+network-anomaly-dashboard/backend/pnpm-lock.yaml
 
 # =====================================
 # AI/ML Training and Models (Essential models only via Git LFS)
@@ -197,6 +221,15 @@ videos/
 docs/_build/
 site/
 
+# Leaflet and map tiles cache
+network-anomaly-dashboard/src/styles/leaflet.css.bak
+*.map-cache
+map-tiles/
+
+# React and development hot reload
+network-anomaly-dashboard/.react/
+network-anomaly-dashboard/backend/.cache/
+
 # =====================================
 # Generated/Computed Files & Unnecessary Scripts
 # =====================================
@@ -213,12 +246,12 @@ fix_summary.py
 multi_dataset_summary.py
 dataset_setup_guide.py
 data_input_guide.py
-
+.github/
 # IDE and development artifacts
 .kiro/
 .vscode/settings.json
 .vscode/launch.json
-
+.gitattributes
 # Plots and visualizations (keep structure, ignore temp files)
 plots/temp/
 plots/cache/
